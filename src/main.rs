@@ -1,34 +1,28 @@
-use rand::Rng;
-
 fn main() {
-  println!("Guess a number game!");
+  let s = String::from("kekw");
 
-  let secret_number = rand::thread_rng().gen_range(1..=100);
+  // takes_ownership(s);
+  // let s = takes_and_gives_ownership(s);
+  // let (s, s_size) = ownership_size(s);
+  let s_size = reference_size(&s);
 
-  loop {
-    let mut user_input = String::new();
+  println!("String \"{}\" has size {}", s, s_size);
+}
 
-    println!("Enter a number:");
+fn takes_ownership(s: String) {
+  //
+}
 
-    std::io::stdin().read_line(&mut user_input).expect("KEKWait");
+fn takes_and_gives_ownership(s: String) -> String {
+  return s;
+}
 
-    let user_input: i32 = match user_input.trim().parse() {
-      Ok(n) => n,
-      Err(_) => {
-        println!("Couldn't parse number SadGe");
-        continue;
-      }
-    };
+fn ownership_size(s: String) -> (String, usize) {
+  let len = s.len();
+  return (s, len);
+}
 
-    println!("You entered {}!", &user_input);
-
-    match user_input.cmp(&secret_number) {
-      std::cmp::Ordering::Equal => {
-        println!("Sick bro");
-        break;
-      }
-      std::cmp::Ordering::Greater => println!("You chomk"),
-      std::cmp::Ordering::Less => println!("No gainz"),
-    }
-  }
+fn reference_size(s: &String) -> usize {
+  let len = s.len();
+  return len;
 }
