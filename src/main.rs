@@ -1,21 +1,29 @@
 fn main() {
-  let s = String::from("kekw");
+  let user_1 = User {
+    username: "Tim1337".to_string(),
+    password: "s3cr3t!".to_string(),
+    login_count: 0,
+  };
 
-  println!("first word of s: {}", first_word(&s[..]));
-  // Does the same thing
-  // println!("first word of s: {}", first_word(&s));
+  let user_2 = User {
+    username: "kekw_h4ckz0r".to_string(),
+    password: "123".to_string(),
+    ..user_1
+  };
+
+  println!(
+    "{}:\npassword: {}\nlogin count: {}",
+    user_1.username, user_1.password, user_1.login_count
+  );
+
+  println!(
+    "{}:\npassword: {}\nlogin count: {}",
+    user_2.username, user_2.password, user_2.login_count
+  );
 }
 
-fn first_word(s: &str) -> &str {
-  println!("inside 'first_word' - s is: {}", s);
-
-  let s_bytes = s.as_bytes();
-
-  for (i, &v) in s_bytes.iter().enumerate() {
-    if v == b' ' {
-      return &s[0..i];
-    }
-  }
-
-  return &s;
+struct User {
+  username: String,
+  password: String,
+  login_count: u64,
 }
