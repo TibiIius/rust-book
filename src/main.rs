@@ -1,11 +1,21 @@
 fn main() {
-  let mut s = String::from("kekw");
+  let s = String::from("kekw");
 
-  let r1 = &mut s;
-  r1.push_str(" < lulw");
-  println!("{}", r1);
+  println!("first word of s: {}", first_word(&s[..]));
+  // Does the same thing
+  // println!("first word of s: {}", first_word(&s));
+}
 
-  let r2 = &mut s;
-  r2.push_str(" pepeLaugh");
-  println!("{}", r2);
+fn first_word(s: &str) -> &str {
+  println!("inside 'first_word' - s is: {}", s);
+
+  let s_bytes = s.as_bytes();
+
+  for (i, &v) in s_bytes.iter().enumerate() {
+    if v == b' ' {
+      return &s[0..i];
+    }
+  }
+
+  return &s;
 }
