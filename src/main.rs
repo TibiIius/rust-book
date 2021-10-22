@@ -1,7 +1,21 @@
 fn main() {
-  let x = 5;
+  let my_coin: Coin = Coin::Nickel;
 
-  let y: Option<i32> = Some(5);
+  println!("{}", Coin::value_coin_cents(&my_coin));
+}
 
-  println!("{}", x + y.unwrap());
+enum Coin {
+  Penny,
+  Nickel,
+  Dime,
+}
+
+impl Coin {
+  fn value_coin_cents(coin: &Coin) -> u8 {
+    match coin {
+      Coin::Penny => 2,
+      Coin::Nickel => 5,
+      Coin::Dime => 10,
+    }
+  }
 }
