@@ -1,17 +1,20 @@
-use std::collections::HashMap;
+use std::fs::File;
+use std::io::ErrorKind;
 
 fn main() {
-  let teams = vec!["Yellow", "Blue"];
-  let mut scores = vec![1337, 1336];
+  let f = File::open("./test.md");
 
-  let mut my_hash_map: HashMap<_, _> = teams.into_iter().zip(scores.into_iter()).collect();
-
-  my_hash_map.entry("Red").or_insert(1);
-
-  println!("{:?}", my_hash_map);
-
-  match my_hash_map.get("Yellow") {
-    Some(e) => println!("Yellow team's points are: {}", e),
-    None => println!("No yellow team! :("),
-  }
+  let f = match f {
+    Ok(f) => f,
+    Err(e) => match e.kind() {
+      ErrorKind::NotFound => {
+        println!("File does not yet exist and will be created");
+        match File::create("./test.md") {
+          Ok(fc) => fc,
+          Err(e) => panic!("Error creating file: {:?}", e),
+        }
+      }
+      other => panic!("Error reading/creating file: {:?}", other),
+    },
+  };
 }
