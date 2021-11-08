@@ -1,15 +1,17 @@
+use std::collections::HashMap;
+
 fn main() {
-  let s1 = "me a string".to_string();
-  let s2 = ", me too!".to_string();
+  let teams = vec!["Yellow", "Blue"];
+  let mut scores = vec![1337, 1336];
 
-  let s_combined = s1 + &s2;
+  let mut my_hash_map: HashMap<_, _> = teams.into_iter().zip(scores.into_iter()).collect();
 
-  let s1 = "me a string".to_string();
+  my_hash_map.entry("Red").or_insert(1);
 
-  let s_formatted = format!("{}{}", s1, s2);
+  println!("{:?}", my_hash_map);
 
-  println!("{}", s_formatted);
-
-  print!("{}", s1);
-  print!("{}", s2);
+  match my_hash_map.get("Yellow") {
+    Some(e) => println!("Yellow team's points are: {}", e),
+    None => println!("No yellow team! :("),
+  }
 }
