@@ -1,40 +1,51 @@
+use std::fmt::Display;
+
 fn main() {
-  let number_list = vec![1, 2, 3, 4];
+  let article = NewsArticle {
+    headline: "Anime Neko Girls".to_string(),
+    body: "In this article, I'm going to talk about neko girls in anime UwU.".to_string(),
+    author: "Tim B.".to_string(),
+  };
 
-  let char_list = vec!['a', 'b', 'C'];
-
-  println!("the largest number in the list is: {}", largest(&number_list));
-
-  println!("the largest char in the list is: {}", largest(&char_list));
-
-  let point = Point { x: 5, y: 7 };
-  let point_other = Point { x: 5, y: 7 };
-
-  println!("it is {} that both points are equal.", point.equals(&point_other));
+  println!("{}", article.summarize());
 }
 
-fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> T
+trait Summary {
+  fn summarize(&self) -> String;
+}
+
+struct NewsArticle {
+  headline: String,
+  body: String,
+  author: String,
+}
+
+impl Summary for NewsArticle {
+  fn summarize(&self) -> String {
+    format!(
+      "Article \"{}\", written by \"{}\": \"{:?}\".",
+      self.headline,
+      self.author,
+      self.body.get(0..300).unwrap_or(&self.body[..])
+    )
+  }
+}
+
+// do this
+fn do_stuff(e: &impl Summary) -> String {
+  e.summarize()
+}
+
+// or this (functionally equivalent)
+fn do_stuff_but_better<T: Summary>(e: T) -> String {
+  e.summarize()
+}
+
+// or this (PogT right here)
+fn do_stuff_the_best<T, U>(e_1: T, e_2: U) -> i32
 where
-  T: Copy,
+  T: Display + Summary,
+  U: Summary,
 {
-  let mut largest = list[0];
-
-  for &i in list {
-    if i > largest {
-      largest = i;
-    }
-  }
-
-  largest
-}
-
-struct Point<T: std::cmp::PartialEq> {
-  x: T,
-  y: T,
-}
-
-impl<T: std::cmp::PartialEq> Point<T> {
-  fn equals(&self, other: &Point<T>) -> bool {
-    self.y == other.y && self.x == other.x
-  }
+  1337
 }
