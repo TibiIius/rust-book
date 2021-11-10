@@ -1,51 +1,28 @@
 use std::fmt::Display;
 
-fn main() {
-  let article = NewsArticle {
-    headline: "Anime Neko Girls".to_string(),
-    body: "In this article, I'm going to talk about neko girls in anime UwU.".to_string(),
-    author: "Tim B.".to_string(),
-  };
+fn main() {}
 
-  println!("{}", article.summarize());
-}
-
-trait Summary {
-  fn summarize(&self) -> String;
-}
-
-struct NewsArticle {
-  headline: String,
-  body: String,
-  author: String,
-}
-
-impl Summary for NewsArticle {
-  fn summarize(&self) -> String {
-    format!(
-      "Article \"{}\", written by \"{}\": \"{:?}\".",
-      self.headline,
-      self.author,
-      self.body.get(0..300).unwrap_or(&self.body[..])
-    )
+// tell all parameters to life as long as the lifetime of `'a` is
+// otherwise, the compiler assigns lifetime `'a` => `x` && `'b` => `y` and can't determine the
+// lifetime of `-> &str`
+// see https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#lifetime-elision
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  if x.len() > y.len() {
+    x
+  } else {
+    y
   }
 }
 
-// do this
-fn do_stuff(e: &impl Summary) -> String {
-  e.summarize()
-}
-
-// or this (functionally equivalent)
-fn do_stuff_but_better<T: Summary>(e: T) -> String {
-  e.summarize()
-}
-
-// or this (PogT right here)
-fn do_stuff_the_best<T, U>(e_1: T, e_2: U) -> i32
+// traits, lifetimes, generics in one
+fn longest_with_an_announcement<'a, T>(x: &'a str, y: &'a str, ann: T) -> &'a str
 where
-  T: Display + Summary,
-  U: Summary,
+  T: Display,
 {
-  1337
+  println!("Announcement! {}", ann);
+  if x.len() > y.len() {
+    x
+  } else {
+    y
+  }
 }
