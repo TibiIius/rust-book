@@ -22,7 +22,13 @@ impl Arguments {
 pub fn run(parsed_args: Arguments) -> Result<(), Box<dyn Error>> {
   let contents = fs::read_to_string(parsed_args.file_name)?;
 
-  for l in find_lines(parsed_args.query_string.as_ref(), contents.as_ref()) {
+  let res = if std::env::var("CASE_INSENSITIVE").is_err() {
+    find_lines(parsed_args.query_string.as_ref(), contents.as_ref())
+  } else {
+    find_lines_case_insensitive(parsed_args.query_string.as_ref(), contents.as_ref())
+  };
+
+  for l in res {
     println!("{}", l);
   }
 
@@ -35,6 +41,18 @@ pub fn find_lines<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
   for l in content.lines() {
     if l.contains(query) {
       ret.push(l);
+    }
+  }
+
+  ret
+}
+
+pub fn find_lines_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+  let mut ret: Vec<&str> = vec![];
+
+  for l in content.lines() {
+    if l.to_lowercase().contains(&query.to_lowercase()) {
+      ret.push(l)
     }
   }
 
