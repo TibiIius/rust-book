@@ -1,17 +1,26 @@
-use minigrep::Arguments;
+use std::{thread, time::Duration};
 
 fn main() {
-  let parsed_args = Arguments::new(std::env::args().collect::<Vec<String>>().as_ref()).unwrap_or_else(|e| {
-    eprintln!("Error parsing console arguments: {}", e);
-    std::process::exit(1);
-  });
+  let simulated_user_specified_value = 10;
+  let simulated_random_number = 7;
 
-  // Use if let instead of unwrap_or_else() because we don't want to unwrap Ok(()), we only care about the error value
-  if let Err(e) = minigrep::run(parsed_args) {
-    eprintln!("The program encountered an unexpected error: {}", e);
+  generate_workout_plan(simulated_user_specified_value, simulated_random_number);
+}
 
-    std::process::exit(1);
+fn simulated_expensive_calculation(intensity: i32) -> i32 {
+  println!("Doing slow calculations...");
+  thread::sleep(Duration::from_secs(3));
+  println!("Done calculating!");
+  intensity
+}
+
+fn generate_workout_plan(intensity: i32, random_number: i32) {
+  if intensity < 25 {
+    println!("Today, do {} pushups!", simulated_expensive_calculation(intensity));
+    println!("Next, do {} situps!", simulated_expensive_calculation(intensity));
+  } else if random_number == 3 {
+    println!("Take a break today! Remember to stay hydrated!");
+  } else {
+    println!("Today, run for {} minutes!", simulated_expensive_calculation(intensity));
   }
-
-  std::process::exit(0);
 }
