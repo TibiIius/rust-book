@@ -1,26 +1,48 @@
-use std::{thread, time::Duration};
+#[derive(Debug, PartialEq, Copy, Clone)]
+enum ShirtColor {
+  Red,
+  Blue
+}
+
+struct Inventory {
+  shirts: Vec<ShirtColor>
+}
+
+impl Inventory {
+  fn giveaway(&self, color: Option<ShirtColor>) -> ShirtColor {
+    color.unwrap_or_else(|| self.get_most_stocked())
+  }
+
+  fn get_most_stocked(&self) -> ShirtColor {
+    let mut num_red = 0;
+    let mut num_blue = 0;
+
+    for color in &self.shirts {
+      match color {
+        ShirtColor::Red => num_red += 1,
+        ShirtColor::Blue => num_blue += 1
+      }
+    }
+
+    if num_red > num_blue {
+      ShirtColor::Red
+    } else {
+      ShirtColor::Blue
+    }
+  }
+}
 
 fn main() {
-  let simulated_user_specified_value = 10;
-  let simulated_random_number = 7;
+  let store = Inventory {
+    shirts: vec![ShirtColor::Red, ShirtColor::Blue, ShirtColor::Red, ShirtColor::Blue, ShirtColor::Red]
+  }; // 3 red, 2 blue
 
-  generate_workout_plan(simulated_user_specified_value, simulated_random_number);
-}
+  let pref1 = Some(ShirtColor::Blue);
+  let giveaway1 = store.giveaway(pref1);
 
-fn simulated_expensive_calculation(intensity: i32) -> i32 {
-  println!("Doing slow calculations...");
-  thread::sleep(Duration::from_secs(3));
-  println!("Done calculating!");
-  intensity
-}
+  println!("The user with preference {:?} gets {:?}", pref1, giveaway1);
 
-fn generate_workout_plan(intensity: i32, random_number: i32) {
-  if intensity < 25 {
-    println!("Today, do {} pushups!", simulated_expensive_calculation(intensity));
-    println!("Next, do {} situps!", simulated_expensive_calculation(intensity));
-  } else if random_number == 3 {
-    println!("Take a break today! Remember to stay hydrated!");
-  } else {
-    println!("Today, run for {} minutes!", simulated_expensive_calculation(intensity));
-  }
+  let pref2 = None;
+  let giveaway2 = store.giveaway(pref2);
+  println!("The user with preference {:?} gets {:?}", pref2, giveaway2); 
 }
