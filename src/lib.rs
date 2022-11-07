@@ -1,3 +1,7 @@
+//! # minigrep
+//!
+//! `minigrep` is a CLI tool that imitates the functionality of the `grep` command.
+
 use std::error::Error;
 use std::fs;
 
@@ -43,10 +47,32 @@ pub fn run(parsed_args: Arguments) -> Result<(), Box<dyn Error>> {
   Ok(())
 }
 
+/// Takes a string and a query param
+///
+/// Returns a vector of strings that contain the query param
+///
+/// # Example
+/// ```
+/// let query = "My";
+///
+/// let contents = "My house is big\nmy house is big";
+///
+/// assert_eq!(vec!["My house is big"], minigrep::find_lines(query, contents));
 pub fn find_lines<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
   content.lines().filter(|l| l.contains(query)).collect()
 }
 
+/// Takes a string and a query param
+///
+/// Returns a vector of strings that contain the query param, wihtout case sensitivity
+///
+/// # Example
+/// ```
+/// let query = "My";
+///
+/// let contents = "My house is big\nmy house is big";
+///
+/// assert_eq!(vec!["My house is big", "my house is big"], minigrep::find_lines_case_insensitive(query, contents));
 pub fn find_lines_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
   content
     .lines()
