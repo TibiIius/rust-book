@@ -1,12 +1,17 @@
 fn main() {
-  let mut list = vec![1, 2, 3];
-  println!("Before defining closure: {:?}", list);
+  let list: Vec<i32> = vec![1, 2, 3];
 
-  let mut borrows_mutably = || list.push(7);
+  println!("Original list:");
+  for val in list.iter() {
+    print!("{} ", val);
+  }
+  println!();
 
-  // Cannot be called as the closure borrows the list mutably!
-  // println!("Before calling closure: {:?}", list);
+  let list2: Vec<_> = list.iter().map(|x| x + 1).collect();
 
-  borrows_mutably();
-  println!("After calling closure: {:?}", list);
+  println!("Modified list:");
+  for val in list2.iter() {
+    print!("{} ", val);
+  }
+  println!();
 }
