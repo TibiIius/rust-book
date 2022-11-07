@@ -1,48 +1,91 @@
-#[derive(PartialEq, Debug)]
-struct Shoe {
-  size: u32,
-  style: String,
+use std::error::Error;
+use std::fs;
+
+pub struct Arguments {
+  query_string: String,
+  file_name: String,
 }
 
-fn shoes_in_my_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
-  shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+impl Arguments {
+  pub fn new(mut args: impl Iterator<Item = String>) -> Result<Arguments, &'static str> {
+    args.next(); // Skip the program name
+
+    let query_string = match args.next() {
+      Some(arg) => arg,
+      None => return Err("Didn't get a query string"),
+    };
+
+    let file_name = match args.next() {
+      Some(arg) => arg,
+      None => return Err("Didn't get a file name"),
+    };
+
+    Ok(Arguments {
+      query_string,
+      file_name,
+    })
+  }
+}
+
+pub fn run(parsed_args: Arguments) -> Result<(), Box<dyn Error>> {
+  let contents = fs::read_to_string(parsed_args.file_name)?;
+
+  let res = if std::env::var("CASE_INSENSITIVE").is_err() {
+    find_lines(parsed_args.query_string.as_ref(), contents.as_ref())
+  } else {
+    find_lines_case_insensitive(parsed_args.query_string.as_ref(), contents.as_ref())
+  };
+
+  for l in res {
+    println!("{}", l);
+  }
+
+  Ok(())
+}
+
+pub fn find_lines<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+  content.lines().filter(|l| l.contains(query)).collect()
+}
+
+pub fn find_lines_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+  content
+    .lines()
+    .filter(|l| l.to_lowercase().contains(&query.to_lowercase()))
+    .collect()
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
   use super::*;
 
   #[test]
-  fn filters_by_size() {
-    let shoes = vec![
-      Shoe {
-        size: 10,
-        style: String::from("sneaker"),
-      },
-      Shoe {
-        size: 13,
-        style: String::from("sandal"),
-      },
-      Shoe {
-        size: 10,
-        style: String::from("boot"),
-      },
-    ];
+  fn new_arguments() {
+    let args = vec!["program_name".to_string(), "test".to_string(), "file.md".to_string()];
 
-    let in_my_size = shoes_in_my_size(shoes, 10);
+    let args_parsed = Arguments::new(args.into_iter());
 
-    assert_eq!(
-      in_my_size,
-      vec![
-        Shoe {
-          size: 10,
-          style: String::from("sneaker"),
-        },
-        Shoe {
-          size: 10,
-          style: String::from("boot"),
-        },
-      ]
-    );
+    assert_eq!(args_parsed.as_ref().unwrap().query_string, "test".to_string());
+    assert_eq!(args_parsed.as_ref().unwrap().file_name, "file.md".to_string());
+  }
+
+  #[test]
+  fn new_arguments_incorrect() {
+    let args = vec!["program_name".to_string()];
+
+    let args_parsed = Arguments::new(args.into_iter());
+
+    assert!(args_parsed.is_err());
+  }
+
+  #[test]
+  fn single_result() {
+    let query = "duct";
+
+    let file_content = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+    assert_eq!(vec!["safe, fast, productive."], find_lines(query, file_content));
   }
 }
