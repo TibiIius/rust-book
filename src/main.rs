@@ -9,4 +9,17 @@ impl<T> Deref for MyBox<T> {
   }
 }
 
-fn main() {}
+impl<T> MyBox<T> {
+  fn new(init_val: T) -> MyBox<T> {
+    MyBox(init_val)
+  }
+}
+
+fn hello(name: &str) {
+  println!("Hello {name}! :)");
+}
+
+fn main() {
+  let my_val = MyBox::new(String::from("Tim"));
+  hello(&my_val);
+}
