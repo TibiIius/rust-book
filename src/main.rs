@@ -1,25 +1,24 @@
-use std::ops::Deref;
-struct MyBox<T>(T);
-
-impl<T> Deref for MyBox<T> {
-  type Target = T;
-
-  fn deref(&self) -> &Self::Target {
-    &self.0
-  }
+struct CustomSmartPointer {
+  data: String,
 }
 
-impl<T> MyBox<T> {
-  fn new(init_val: T) -> MyBox<T> {
-    MyBox(init_val)
+impl Drop for CustomSmartPointer {
+  fn drop(&mut self) {
+    println!("Dropping CustomSmartPointer with data: `{}`.", self.data);
   }
-}
-
-fn hello(name: &str) {
-  println!("Hello {name}! :)");
 }
 
 fn main() {
-  let my_val = MyBox::new(String::from("Tim"));
-  hello(&my_val);
+  let c = CustomSmartPointer {
+    data: String::from("my stuff"),
+  };
+
+  let c2 = CustomSmartPointer {
+    data: String::from("other stuff"),
+  };
+
+  println!("CustomSmartPointer instances created.");
+
+  std::mem::drop(c2);
+  println!("c2 dropped before end of main.");
 }
