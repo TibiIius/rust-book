@@ -1,19 +1,26 @@
 use std::{
-  process,
-  sync::{mpsc, Mutex},
+  sync::{Arc, Mutex},
   thread,
-  time::Duration,
 };
 
 fn main() {
-  let mtx = Mutex::new(5);
+  // Arc is basically an atomic Rc, so it's thread-safe
+  let rc_mtx = Arc::new(Mutex::new(0));
+  let mut handles = vec![];
 
-  {
-    // `lock()` tries to acquire the mutex' lock
-    // if the mutex is locked, it blocks until it can acquire the lock
-    let mut guard = mtx.lock().unwrap();
-    *guard = 6;
+  for _ in 0..10 {
+    let mtx = Arc::clone(&rc_mtx);
+    let handle = thread::spawn(move || {
+      let mut guard = mtx.lock().unwrap();
+
+      *guard += 1;
+    });
+    handles.push(handle);
   }
 
-  println!("mtx = {:?}", mtx);
+  for handle in handles {
+    handle.join().unwrap();
+  }
+
+  println!("Result: {}", *rc_mtx.lock().unwrap());
 }
