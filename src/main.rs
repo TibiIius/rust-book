@@ -1,25 +1,39 @@
-use std::{thread, time::Duration};
+use std::{process, sync::mpsc, thread, time::Duration};
 
 fn main() {
-  let v = vec![1, 2, 3];
+  let (tx, rx) = mpsc::channel();
+  let tx2 = tx.clone();
 
-  let handle = thread::spawn(|| {
-    for i in 1..10 {
-      println!("Number {i} in spawned thread.");
-      thread::sleep(Duration::from_millis(1));
+  thread::spawn(move || {
+    let vals = vec![String::from("Hello"), String::from("from"), String::from("sender.")];
+
+    for val in vals {
+      if let Err(e) = tx.send(val) {
+        println!("An error occured trying to send some data to a receiver: {e}");
+      }
+      thread::sleep(Duration::from_secs(1));
     }
   });
 
-  let handle2 = thread::spawn(move || {
-    println!("My vector v has the beautiful values: {:?}", v);
+  thread::spawn(move || {
+    let vals = vec![String::from("How"), String::from("are"), String::from("you?")];
+
+    for val in vals {
+      if let Err(e) = tx2.send(val) {
+        println!("An error occured trying to send some data to a receiver: {e}");
+      }
+      thread::sleep(Duration::from_secs(1));
+    }
   });
 
-  handle2.join().unwrap();
+  // `recv()` blocks until the transmitter sent something
+  // `try_recv()` would not block and return Err if it got nothing from the transmitter
+  // let received = rx.recv().unwrap();
 
-  for i in 1..5 {
-    println!("Number {i} in main thread.");
-    thread::sleep(Duration::from_millis(1));
+  // basically calls recv() a couple of times
+  for received in rx {
+    println!("Received some data from another thread: {received}");
   }
 
-  handle.join().unwrap();
+  process::exit(0)
 }
