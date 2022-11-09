@@ -1,26 +1,32 @@
-use std::{
-  sync::{Arc, Mutex},
-  thread,
-};
+use std::vec;
+
+use gui::{Button, Draw, Screen};
+
+struct SelectBox {
+  width: u32,
+  height: u32,
+  options: Vec<String>,
+}
+
+impl Draw for SelectBox {
+  fn draw(&self) {
+    // some other draw stuff
+  }
+}
 
 fn main() {
-  // Arc is basically an atomic Rc, so it's thread-safe
-  let rc_mtx = Arc::new(Mutex::new(0));
-  let mut handles = vec![];
-
-  for _ in 0..10 {
-    let mtx = Arc::clone(&rc_mtx);
-    let handle = thread::spawn(move || {
-      let mut guard = mtx.lock().unwrap();
-
-      *guard += 1;
-    });
-    handles.push(handle);
-  }
-
-  for handle in handles {
-    handle.join().unwrap();
-  }
-
-  println!("Result: {}", *rc_mtx.lock().unwrap());
+  let screen = Screen {
+    components: vec![
+      Box::new(SelectBox {
+        width: 12,
+        height: 20,
+        options: vec![String::from("yes"), String::from("no"), String::from("we yes no")],
+      }),
+      Box::new(Button {
+        width: 10,
+        height: 10,
+        label: String::from("OK"),
+      }),
+    ],
+  };
 }
