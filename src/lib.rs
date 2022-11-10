@@ -1,29 +1,87 @@
-pub trait Draw {
-  fn draw(&self);
+pub struct Post {
+  state: Option<Box<dyn State>>,
+  content: String,
 }
 
-pub struct Screen {
-  // trait object; `Box<T>` can hold any type `T` that implements the `Draw` trait
-  // this could hold instances of type e.g. `Box<Button>` and `Box<TextBox>` using a single `Screen` instance; using `Vec<T>` would limit us to one type per instance of `Screen` only
-  pub components: Vec<Box<dyn Draw>>,
+impl Default for Post {
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
-impl Screen {
-  pub fn run(&self) {
-    for comp in self.components.iter() {
-      comp.draw();
+impl Post {
+  pub fn new() -> Post {
+    Post {
+      state: Some(Box::new(Draft {})),
+      content: String::new(),
+    }
+  }
+
+  pub fn add_text(&mut self, text: &str) {
+    self.content.push_str(text);
+  }
+
+  pub fn content(&self) -> &str {
+    self.state.as_ref().unwrap().content(self)
+  }
+
+  pub fn request_review(&mut self) {
+    if let Some(s) = self.state.take() {
+      self.state = Some(s.request_review())
+    }
+  }
+
+  pub fn approve(&mut self) {
+    if let Some(s) = self.state.take() {
+      self.state = Some(s.approve())
     }
   }
 }
 
-pub struct Button {
-  pub width: u32,
-  pub height: u32,
-  pub label: String,
+trait State {
+  fn request_review(self: Box<Self>) -> Box<dyn State>;
+  fn approve(self: Box<Self>) -> Box<dyn State>;
+  fn content<'a>(&'a self, post: &'a Post) -> &str {
+    ""
+  }
 }
 
-impl Draw for Button {
-  fn draw(&self) {
-    // do some drawing stuff
+struct Draft {}
+
+impl State for Draft {
+  fn request_review(self: Box<Self>) -> Box<dyn State> {
+    Box::new(PendingReview {})
+  }
+
+  fn approve(self: Box<Self>) -> Box<dyn State> {
+    self
+  }
+}
+
+struct PendingReview {}
+
+impl State for PendingReview {
+  fn request_review(self: Box<Self>) -> Box<dyn State> {
+    self
+  }
+
+  fn approve(self: Box<Self>) -> Box<dyn State> {
+    Box::new(Published {})
+  }
+}
+
+struct Published {}
+
+impl State for Published {
+  fn request_review(self: Box<Self>) -> Box<dyn State> {
+    self
+  }
+
+  fn approve(self: Box<Self>) -> Box<dyn State> {
+    self
+  }
+
+  fn content<'a>(&'a self, post: &'a Post) -> &str {
+    &post.content
   }
 }
