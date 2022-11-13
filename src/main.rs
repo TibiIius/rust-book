@@ -1,49 +1,19 @@
-use core::slice;
+// static variables are basically like constants
+// unlike constants though, they always refer to the same value in memory, meaning they can never be copied
+// accessing static mutable variables is considered unsafe
+// they are considered unsafe as mutiple parts of the program always access the same instance
+// with mutiple threads, accessing static variables and mutating them can lead to data races
+static mut COUNTER: u32 = 0;
 
-// extern code is always unsafe
-extern "C" {
-  fn abs(input: i32) -> i32;
-}
-
-unsafe fn danger_time(x: i32) {
-  let r = &x as *const i32;
-
-  println!("r holds {}", *r);
-}
-
-fn split_at_mut(values_vec: &mut [i32], split: usize) -> (&mut [i32], &mut [i32]) {
-  let len = values_vec.len();
-  let ptr = values_vec.as_mut_ptr();
-
-  assert!(split <= len);
-
-  // can't be called like this
-  // we borrow from the `values_vec` slice twice, but you can normally only borrow from a slice once
-  // this is ok, since both parts of the slice are different, but the borrow checker can't know that
-  // (&mut values_vec[..split], &mut values_vec[split..])
-
-  // unsafe implementation
+fn add_to(inc: u32) {
   unsafe {
-    (
-      slice::from_raw_parts_mut(ptr, split),
-      slice::from_raw_parts_mut(ptr.add(split), len - split),
-    )
+    COUNTER += inc;
   }
 }
-
 fn main() {
-  let mut num = 5;
+  add_to(3);
 
-  let ref_1 = &num as *const i32;
-  let ref_2 = &mut num as *mut i32;
-
-  // raw pointers are only deferencable in unsafe blocks
   unsafe {
-    println!("ref_1 is: {}", *ref_1);
-    println!("ref_2 is: {}", *ref_2);
-
-    danger_time(num);
-
-    println!("Absolute value of -3, with abs called from C: {}", abs(-3));
+    println!("COUNTER has the value: {COUNTER}");
   }
 }
