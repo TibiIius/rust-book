@@ -1,51 +1,49 @@
-struct Point {
-  x: i32,
-  y: i32,
+use core::slice;
+
+// extern code is always unsafe
+extern "C" {
+  fn abs(input: i32) -> i32;
+}
+
+unsafe fn danger_time(x: i32) {
+  let r = &x as *const i32;
+
+  println!("r holds {}", *r);
+}
+
+fn split_at_mut(values_vec: &mut [i32], split: usize) -> (&mut [i32], &mut [i32]) {
+  let len = values_vec.len();
+  let ptr = values_vec.as_mut_ptr();
+
+  assert!(split <= len);
+
+  // can't be called like this
+  // we borrow from the `values_vec` slice twice, but you can normally only borrow from a slice once
+  // this is ok, since both parts of the slice are different, but the borrow checker can't know that
+  // (&mut values_vec[..split], &mut values_vec[split..])
+
+  // unsafe implementation
+  unsafe {
+    (
+      slice::from_raw_parts_mut(ptr, split),
+      slice::from_raw_parts_mut(ptr.add(split), len - split),
+    )
+  }
 }
 
 fn main() {
-  let mut stack = Vec::new();
+  let mut num = 5;
 
-  stack.push(1);
-  stack.push(2);
-  stack.push(3);
+  let ref_1 = &num as *const i32;
+  let ref_2 = &mut num as *mut i32;
 
-  //`let Some(x)` -> refutable pattern
-  // only possible with `if let` and `while let`
-  while let Some(e) = stack.pop() {
-    println!("{e}");
-  }
+  // raw pointers are only deferencable in unsafe blocks
+  unsafe {
+    println!("ref_1 is: {}", *ref_1);
+    println!("ref_2 is: {}", *ref_2);
 
-  let my_vec = vec!["one", "two", "three"];
+    danger_time(num);
 
-  for (index, val) in my_vec.iter().enumerate() {
-    println!("{index}: {val}");
-  }
-
-  let x = Some(5);
-
-  print!("x is ");
-  match x {
-    Some(5) => println!("five"),
-    Some(4 | 6) => println!("four or six"),
-    Some(10..=100000) => println!("a big number (between 10 and 100000)"),
-    // Some(y) => println!("matched something else: {y}"), // Same as below, but the matched variable is not dropped and instead is bound to y
-    Some(_) => println!("something else"),
-    None => println!("nothing"),
-  }
-
-  let point = Point { x: 0, y: 7 };
-
-  // destruct so that we can use the variables x and y directly
-  let Point { x, y } = point;
-  assert_eq!(0, x);
-  assert_eq!(7, y);
-
-  let numbers = (2, 4, 8, 16, 32);
-
-  match numbers {
-    (first, .., last) => {
-      println!("Some numbers: {first}, {last}");
-    }
+    println!("Absolute value of -3, with abs called from C: {}", abs(-3));
   }
 }
