@@ -1,11 +1,5 @@
-// create aliases for verbose types
-type Thunk = Box<dyn Fn() + Send + 'static>;
+// this function takes a generic type `T` as an argument
+// T's size is not known at compile time, so we need to specify it with `<t: ?Sized>`
+fn do_something_with_dynamically_sized_type<T: ?Sized>(t: &T) {}
 
-fn takes_long_type(f: Thunk) {}
-
-fn returns_long_type() -> Thunk {
-  Box::new(|| println!("hi"))
-}
-fn main() {
-  let f: Thunk = Box::new(|| println!("hi"));
-}
+fn main() {}
