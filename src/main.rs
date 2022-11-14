@@ -1,5 +1,6 @@
-// this function takes a generic type `T` as an argument
-// T's size is not known at compile time, so we need to specify it with `<t: ?Sized>`
-fn do_something_with_dynamically_sized_type<T: ?Sized>(t: &T) {}
+// this returns a closure
+fn returns_closure() -> Box<dyn Fn(i32) -> i32> {
+  Box::new(|x| x + 1)
+}
 
 fn main() {}
