@@ -1,15 +1,11 @@
-use std::fmt;
+// create aliases for verbose types
+type Thunk = Box<dyn Fn() + Send + 'static>;
 
-// wrapper type so that we can implement new functionality for Vec (has no performance penalty)3
-struct Wrapper(Vec<String>);
+fn takes_long_type(f: Thunk) {}
 
-impl fmt::Display for Wrapper {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "[{}]", self.0.join(", "))
-  }
+fn returns_long_type() -> Thunk {
+  Box::new(|| println!("hi"))
 }
-
 fn main() {
-  let w = Wrapper(vec![String::from("hello"), String::from("world")]);
-  println!("w = {}", w);
+  let f: Thunk = Box::new(|| println!("hi"));
 }
