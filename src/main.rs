@@ -17,16 +17,15 @@ fn main() {
 fn parse_conn(mut stream: TcpStream) {
   let reader = BufReader::new(&mut stream);
 
-  let req: Vec<_> = reader
-    .lines()
-    .map(|res| res.unwrap())
-    .take_while(|l| !l.is_empty())
-    .collect();
+  let req = reader.lines().next().unwrap().unwrap();
 
-  println!("Request object: {:#?}", req);
+  let (status, filename) = if req == "GET / HTTP/1.1" {
+    ("HTTP/1.1 200 OK", "src/index.html")
+  } else {
+    ("HTTP/1.1 404 NOT FOUND", "src/404.html")
+  };
 
-  let status = "HTTP/1.1 200 OK";
-  let body = fs::read_to_string("src/index.html").unwrap();
+  let body = fs::read_to_string(filename).unwrap();
   let len = body.len();
 
   let res = format!("{status}\r\nContent-Length: {len}\r\n\r\n{body}");
