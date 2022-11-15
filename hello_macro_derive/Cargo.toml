@@ -1,0 +1,7 @@
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0"
+quote = "1.0"
+hello_macro = { path = "../../hello_macro" }
