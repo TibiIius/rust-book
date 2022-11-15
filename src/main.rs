@@ -1,16 +1,22 @@
+use rust_web_server::ThreadPool;
 use std::{
   fs,
   io::{prelude::*, BufReader},
   net::{TcpListener, TcpStream},
+  thread,
+  time::Duration,
 };
 
 fn main() {
   let listener = TcpListener::bind("127.0.0.1:7878").expect("Binding failed, check for port availability");
+  let pool = ThreadPool::new(8);
 
   for stream in listener.incoming() {
     let stream = stream.unwrap();
 
-    parse_conn(stream);
+    pool.execute(|| {
+      parse_conn(stream);
+    });
   }
 }
 
@@ -19,10 +25,13 @@ fn parse_conn(mut stream: TcpStream) {
 
   let req = reader.lines().next().unwrap().unwrap();
 
-  let (status, filename) = if req == "GET / HTTP/1.1" {
-    ("HTTP/1.1 200 OK", "src/index.html")
-  } else {
-    ("HTTP/1.1 404 NOT FOUND", "src/404.html")
+  let (status, filename) = match &req[..] {
+    "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "src/index.html"),
+    "GET /sleep HTTP/1.1" => {
+      thread::sleep(Duration::from_secs(5));
+      ("HTTP/1.1 200 OK", "src/index.html")
+    }
+    _ => ("HTTP/1.1 404 NOT FOUND", "src/404.html"),
   };
 
   let body = fs::read_to_string(filename).unwrap();
